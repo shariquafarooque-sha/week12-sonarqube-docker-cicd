@@ -64,12 +64,9 @@ pipeline {
             }
         }
 
-      stage('Push to DockerHub') {
+     stage('Push to DockerHub') {
     steps {
-        withCredentials([string(
-            credentialsId: 'dockerhub-token',
-            variable: 'DOCKER_TOKEN'
-        )]) {
+        withCredentials([string(credentialsId: 'dockerhub-token', variable: 'DOCKER_TOKEN')]) {
             powershell '''
             docker logout
 
