@@ -66,18 +66,17 @@ pipeline {
 
       stage('Push to DockerHub') {
     steps {
-        withCredentials([usernamePassword(
-            credentialsId: 'dockerhub-credentials',
-            usernameVariable: 'DOCKER_USER',
-            passwordVariable: 'DOCKER_PASS'
+        withCredentials([string(
+            credentialsId: 'dockerhub-token',
+            variable: 'DOCKER_TOKEN'
         )]) {
             powershell '''
             docker logout
 
-            $env:DOCKER_PASS | docker login --username $env:DOCKER_USER --password-stdin
+            $env:DOCKER_TOKEN | docker login --username "shariquafarooque" --password-stdin
             if ($LASTEXITCODE -ne 0) { exit 1 }
 
-            docker push "$env:DOCKER_IMAGE`:latest"
+            docker push "shariquafarooque/week12-cicd-app:latest"
             if ($LASTEXITCODE -ne 0) { exit 1 }
             '''
         }
