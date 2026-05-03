@@ -64,17 +64,21 @@ pipeline {
             }
         }
 
-     stage('Push to DockerHub') {
+    stage('Push to DockerHub') {
     steps {
         withCredentials([string(credentialsId: 'dockerhub-token', variable: 'DOCKER_TOKEN')]) {
             powershell '''
             docker logout
 
-            $env:DOCKER_TOKEN | docker login --username "shariquafarooque" --password-stdin
+            [System.IO.File]::WriteAllText("docker-pass.txt", $env:DOCKER_TOKEN, [System.Text.UTF8Encoding]::new($false))
+
+            cmd /c "type docker-pass.txt | docker login -u shariquafarooque --password-stdin"
             if ($LASTEXITCODE -ne 0) { exit 1 }
 
-            docker push "shariquafarooque/week12-cicd-app:latest"
+            docker push shariquafarooque/week12-cicd-app:latest
             if ($LASTEXITCODE -ne 0) { exit 1 }
+
+            Remove-Item docker-pass.txt -Force
             '''
         }
     }
