@@ -17,14 +17,14 @@ pipeline {
         }
 
         stage('Build & Test') {
-            steps {
-                bat '''
-                python -m pip install --upgrade pip
-                pip install -r requirements.txt
-                pytest
-                '''
-            }
-        }
+    steps {
+        bat '''
+        py -m pip install --upgrade pip
+        py -m pip install -r requirements.txt
+        py -m pytest
+        '''
+    }
+}
 
         stage('SonarQube Analysis') {
             steps {
