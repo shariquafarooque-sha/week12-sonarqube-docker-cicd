@@ -8,7 +8,6 @@ pipeline {
     }
 
     stages {
-
         stage('Checkout Code') {
             steps {
                 git branch: 'main',
@@ -17,21 +16,19 @@ pipeline {
         }
 
         stage('Build & Test') {
-    steps {
-        bat '''
-        py -m pip install --upgrade pip
-        py -m pip install -r requirements.txt
-        py -m pytest
-        '''
-    }
-}
+            steps {
+                bat '''
+                "C:\\Users\\shari\\AppData\\Local\\Programs\\Python\\Python313\\python.exe" -m pip install --upgrade pip
+                "C:\\Users\\shari\\AppData\\Local\\Programs\\Python\\Python313\\python.exe" -m pip install -r requirements.txt
+                "C:\\Users\\shari\\AppData\\Local\\Programs\\Python\\Python313\\python.exe" -m pytest
+                '''
+            }
+        }
 
         stage('SonarQube Analysis') {
             steps {
                 withSonarQubeEnv("${SONARQUBE_ENV}") {
-                    bat '''
-                    sonar-scanner
-                    '''
+                    bat 'sonar-scanner'
                 }
             }
         }
@@ -46,9 +43,7 @@ pipeline {
 
         stage('Docker Build') {
             steps {
-                bat '''
-                docker build -t %DOCKER_IMAGE%:latest .
-                '''
+                bat 'docker build -t %DOCKER_IMAGE%:latest .'
             }
         }
 
