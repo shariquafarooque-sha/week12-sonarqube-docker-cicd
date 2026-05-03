@@ -64,19 +64,21 @@ pipeline {
             }
         }
 
-       stage('Push to DockerHub') {
+      stage('Push to DockerHub') {
     steps {
         withCredentials([usernamePassword(
             credentialsId: 'dockerhub-credentials',
             usernameVariable: 'DOCKER_USER',
             passwordVariable: 'DOCKER_PASS'
         )]) {
-            bat '''
+            powershell '''
             docker logout
-            echo %DOCKER_PASS% > pass.txt
-            type pass.txt | docker login -u %DOCKER_USER% --password-stdin || exit /b 1
-            docker push %DOCKER_IMAGE%:latest || exit /b 1
-            del pass.txt
+
+            [Console]::Out.Write($env:DOCKER_PASS) | docker login -u $env:DOCKER_USER --password-stdin
+            if ($LASTEXITCODE -ne 0) { exit 1 }
+
+            docker push "$env:DOCKER_IMAGE`:latest"
+            if ($LASTEXITCODE -ne 0) { exit 1 }
             '''
         }
     }
