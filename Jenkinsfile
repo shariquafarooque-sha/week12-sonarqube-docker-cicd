@@ -8,6 +8,22 @@ pipeline {
     }
 
     stages {
+
+        stage('Debug Credentials') {
+            steps {
+                withCredentials([usernamePassword(
+                    credentialsId: 'dockerhub-credentials',
+                    usernameVariable: 'DOCKER_USER',
+                    passwordVariable: 'DOCKER_PASS'
+                )]) {
+                    bat '''
+                    echo USER: %DOCKER_USER%
+                    echo DockerHub password/token is loaded by Jenkins
+                    '''
+                }
+            }
+        }
+
         stage('Checkout Code') {
             steps {
                 git branch: 'main',
@@ -25,22 +41,22 @@ pipeline {
             }
         }
 
-       stage('SonarQube Analysis') {
-    steps {
-        withSonarQubeEnv("${SONARQUBE_ENV}") {
-            script {
-                def scannerHome = tool 'SonarScanner'
-                bat "\"${scannerHome}\\bin\\sonar-scanner.bat\""
+        stage('SonarQube Analysis') {
+            steps {
+                withSonarQubeEnv("${SONARQUBE_ENV}") {
+                    script {
+                        def scannerHome = tool 'SonarScanner'
+                        bat "\"${scannerHome}\\bin\\sonar-scanner.bat\""
+                    }
+                }
             }
         }
-    }
-}
 
-      stage('Quality Gate') {
-    steps {
-        echo 'Quality Gate verified in SonarQube dashboard'
-    }
-}
+        stage('Quality Gate') {
+            steps {
+                echo 'Quality Gate verified in SonarQube dashboard'
+            }
+        }
 
         stage('Docker Build') {
             steps {
@@ -56,8 +72,11 @@ pipeline {
                     passwordVariable: 'DOCKER_PASS'
                 )]) {
                     bat '''
-                    echo %DOCKER_PASS% | docker login -u %DOCKER_USER% --password-stdin
+                    docker logout
+                    echo %DOCKER_PASS% > pass.txt
+                    type pass.txt | docker login -u %DOCKER_USER% --password-stdin
                     docker push %DOCKER_IMAGE%:latest
+                    del pass.txt
                     '''
                 }
             }
