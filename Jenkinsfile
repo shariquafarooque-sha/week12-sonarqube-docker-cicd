@@ -74,7 +74,7 @@ pipeline {
             powershell '''
             docker logout
 
-            [Console]::Out.Write($env:DOCKER_PASS) | docker login -u $env:DOCKER_USER --password-stdin
+            $env:DOCKER_PASS | docker login --username $env:DOCKER_USER --password-stdin
             if ($LASTEXITCODE -ne 0) { exit 1 }
 
             docker push "$env:DOCKER_IMAGE`:latest"
