@@ -64,24 +64,23 @@ pipeline {
             }
         }
 
-        stage('Push to DockerHub') {
-            steps {
-                withCredentials([usernamePassword(
-                    credentialsId: 'dockerhub-credentials',
-                    usernameVariable: 'DOCKER_USER',
-                    passwordVariable: 'DOCKER_PASS'
-                )]) {
-                    bat '''
-                    docker logout
-                    echo %DOCKER_PASS% > pass.txt
-                    type pass.txt | docker login -u %DOCKER_USER% --password-stdin
-                    docker push %DOCKER_IMAGE%:latest
-                    del pass.txt
-                    '''
-                }
-            }
+       stage('Push to DockerHub') {
+    steps {
+        withCredentials([usernamePassword(
+            credentialsId: 'dockerhub-credentials',
+            usernameVariable: 'DOCKER_USER',
+            passwordVariable: 'DOCKER_PASS'
+        )]) {
+            bat '''
+            docker logout
+            echo %DOCKER_PASS% > pass.txt
+            type pass.txt | docker login -u %DOCKER_USER% --password-stdin || exit /b 1
+            docker push %DOCKER_IMAGE%:latest || exit /b 1
+            del pass.txt
+            '''
         }
-
+    }
+}
         stage('Deploy Locally') {
             steps {
                 bat '''
